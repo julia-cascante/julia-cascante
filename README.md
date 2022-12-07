@@ -1,6 +1,6 @@
 - 👋 Hi, I’m @julia-cascante
-- 👀 I’m interested in data science and software development
-- 🌱 I’m currently learning R and Phyton
+- 👀 I’m interested in Data Science and Machine Learning
+- 🌱 I’m currently learning SQL and Phyton
 - 📫 How to reach me julia.cascante@ucr.ac.cr
 
 <!---
