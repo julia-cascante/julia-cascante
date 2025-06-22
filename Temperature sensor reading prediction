@@ -1,0 +1,61 @@
+# On this project using R, I will use a classification model to predict if a temperature sensor reading is faulty or normal based on temperature, variance and rate of change.
+# If a new reading has high variance or unstable rate of change, the model can flag it as faulty before a failure occurs. 
+# I use visulization to show how well the model distiguishes btw faulty and normal sensors.
+# This model might be used in real time system to trigger alerts or preventive maintenance.
+
+# Load necessary libraries
+library(tidyverse)
+library(randomForest)
+
+# Set seed for reproducibility
+set.seed(42)
+
+# Simulate a dataset
+n <- 200
+temperature <- rnorm(n, mean = 75, sd = 5)
+variance <- runif(n, min = 0.1, max = 3)
+rate_of_change <- rnorm(n, mean = 0, sd = 0.5)
+
+# Introduce faults: some readings with high variance or high change
+faulty <- ifelse(variance > 2 | abs(rate_of_change) > 1, "Faulty", "Normal")
+
+# Create a data frame
+sensor_data <- data.frame(
+  Temperature = temperature,
+  Variance = variance,
+  RateChange = rate_of_change,
+  Status = as.factor(faulty)
+)
+
+head(sensor_data)
+
+# Split data into training and testing sets
+set.seed(123)
+train_indices <- sample(1:nrow(sensor_data), 0.7 * nrow(sensor_data))
+train_data <- sensor_data[train_indices, ]
+test_data <- sensor_data[-train_indices, ]
+
+# Train the model
+model <- randomForest(Status ~ Temperature + Variance + RateChange, data = train_data, ntree = 100)
+
+# Predict on test set
+predictions <- predict(model, test_data)
+
+# Confusion matrix
+table(Predicted = predictions, Actual = test_data$Status)
+
+# Add predictions to the test set for visualization
+test_data$PredictedStatus <- predictions
+
+# Plot using ggplot2
+library(ggplot2)
+
+ggplot(test_data, aes(x = Variance, y = RateChange, color = PredictedStatus, shape = Status)) +
+  geom_point(size = 3, alpha = 0.8) +
+  labs(
+    title = "Sensor Status Prediction: Faulty vs. Normal",
+    x = "Variance of Readings",
+    y = "Rate of Change",
+    color = "Predicted Status",
+    shape = "Actual Status"
+  ) +
